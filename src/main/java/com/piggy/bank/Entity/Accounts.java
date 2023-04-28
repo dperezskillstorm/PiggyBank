@@ -4,6 +4,8 @@ package com.piggy.bank.Entity;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
+
 @Document(collection = "USER_ACCOUNTS")
 
 public class Accounts {
@@ -16,15 +18,8 @@ public class Accounts {
 
     String phoneNumber;
 
-    BankAccount bankAccount;
+    ArrayList<ServiceAccount> serviceAccount;
 
-    public Accounts(String id, String firstName, String lastName, String phoneNumber, BankAccount bankAccount) {
-        this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.phoneNumber = phoneNumber;
-        this.bankAccount = bankAccount;
-    }
 
     public Accounts() {
 
@@ -62,12 +57,13 @@ public class Accounts {
         this.phoneNumber = phoneNumber;
     }
 
-    public BankAccount getBankAccount() {
-        return bankAccount;
+    public ArrayList<ServiceAccount> getServiceAccount() {
+        return serviceAccount;
     }
 
-    public void setBankAccount(BankAccount bankAccount) {
-        this.bankAccount = bankAccount;
+    public void setServiceAccount(ArrayList<ServiceAccount> serviceAccount) {
+        this.serviceAccount = serviceAccount;
     }
 }
+
 

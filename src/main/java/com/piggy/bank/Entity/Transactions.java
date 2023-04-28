@@ -1,47 +1,20 @@
 package com.piggy.bank.Entity;
 
+import lombok.Data;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Document(collection = "TRANSACTIONS")
+@Data
 public class Transactions {
-    double amount;
-    String date;
-    String description;
-    String category;
+    @Id
+    private String Id;
 
-    public Transactions(double amount, String date, String description, String category) {
-        this.amount = amount;
-        this.date = date;
-        this.description = description;
-        this.category = category;
-    }
+    private String accountNumber;
+    private double amount;
+    private String date;
+    private String description;
+    private String category;
 
-    public double getAmount() {
-        return amount;
-    }
 
-    public void setAmount(double amount) {
-        this.amount = amount;
-    }
-
-    public String getDate() {
-        return date;
-    }
-
-    public void setDate(String date) {
-        this.date = date;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
 }

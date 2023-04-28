@@ -1,7 +1,7 @@
 package com.piggy.bank.Controller;
 
 import com.piggy.bank.Entity.Accounts;
-import com.piggy.bank.Entity.BankAccount;
+import com.piggy.bank.Entity.ServiceAccount;
 import com.piggy.bank.Entity.Transactions;
 import com.piggy.bank.Service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("piggy/v1")
@@ -34,54 +36,55 @@ public class AccountControllers {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @PatchMapping("/addBankAccountNumber/{firstName}")
+    @PatchMapping("/addAccount/{firstName}")
 //    {
 //        "accountNumbers": "6666"
 //    }
-    public ResponseEntity<Accounts> associateBankAccountWithUser(@PathVariable String firstName,@RequestBody BankAccount bankAccount){
+    public ResponseEntity<Accounts> associateBankAccountWithUser(@PathVariable String firstName,@RequestBody ServiceAccount serviceAccount){
         Accounts accountToUpdate = service.findByFirstName(firstName);
-        BankAccount acct1 = new BankAccount();
-        acct1.setAccountNumbers(bankAccount.getAccountNumbers());
+        ServiceAccount acct1 = new ServiceAccount();
+        acct1.setAccountNumbers(serviceAccount.getAccountNumbers());
+        acct1.setInterestRate(serviceAccount.getInterestRate());
+        acct1.setPeriods(serviceAccount.getPeriods());
+        acct1.setLoanAmount(serviceAccount.getLoanAmount());
 
-        accountToUpdate.setBankAccount(acct1);
+
+        ArrayList<ServiceAccount> arrService = accountToUpdate.getServiceAccount();
+        if(arrService == null){
+            arrService = new ArrayList<>();
+        }
+        arrService.add(acct1);
+
+        accountToUpdate.setServiceAccount(arrService);
         Accounts response = service.associateBankAccountWithUser(accountToUpdate);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @PatchMapping("/addTransactions/{firstName}/{account}")
 //    {
+//    "accountNumber": "9999"
 //        "amount": 900.0,
 //            "date": "04/26/2023",
 //            "description": "Some Home Stuff",
 //            "category": "Expense"
 //    }
 
-    public ResponseEntity<Accounts> addTransaction(@PathVariable String firstName,@PathVariable String account, @RequestBody Transactions transactions){
-        Accounts accountToUpdate = service.findByFirstName(firstName);
-        BankAccount acct1 = new BankAccount();
-
-        acct1.setAccountNumbers(accountToUpdate.getBankAccount().getAccountNumbers());
-        acct1.setTransactions(accountToUpdate.getBankAccount().getTransactions());
-        ArrayList<Transactions> lsOfTransactions = acct1.getTransactions();
-        System.out.println(lsOfTransactions);
-        if (lsOfTransactions == null){
-            lsOfTransactions = new ArrayList<Transactions>();
-
-        }
-        lsOfTransactions.add(new Transactions(transactions.getAmount(),transactions.getDate(),transactions.getDescription(),transactions.getCategory()));
-        acct1.setTransactions(lsOfTransactions);
-        System.out.println("TRANSACTIONS ARRAY Before: " + lsOfTransactions);
-
-
-        accountToUpdate.setBankAccount(acct1);
-        Accounts response = service.associateBankAccountWithUser(accountToUpdate);
+    public ResponseEntity<Transactions> addTransaction(@PathVariable String firstName,@PathVariable String account, @RequestBody Transactions transactions){
+        Transactions trans = new Transactions();
+        trans.setAccountNumber(account);
+    LocalDate today = LocalDate.now();
+        trans.setDate(today.toString());
+        trans.setAmount(transactions.getAmount());
+        trans.setDescription(transactions.getDescription());
+        trans.setCategory(transactions.getCategory());
+        Transactions response = service.createTransaction(trans);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @GetMapping("/balance/{firstName}/{account}")
     public Double getBalance(@PathVariable String firstName, @PathVariable String account){
-         Accounts result = service.findByFirstName(firstName);
-         Double totalBalance = result.getBankAccount().getTransactions().stream().mapToDouble(tran-> tran.getAmount()).sum();
+         List<Transactions> result = service.findTransactionsByAccountNumber(account);
+         Double totalBalance = result.stream().mapToDouble(tran-> tran.getAmount()).sum();
          return totalBalance;
     }
 
